@@ -1,6 +1,6 @@
 To be added to the footer of the website where you want to embed. With a placeholder div where ever you want to display the chat bot
 
-<div id="chat-placeholder"></div>
+<div id="chat-placeholder-2"></div>
 
 In this script you can edit the front end appearance too. 
 There is two placeholders that have to be set to you backend url either local or deployed it will look like this with the /api/chat added to the end:
@@ -33,15 +33,15 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
   }
 
   // Generate or retrieve User ID
-  let userID = getCookie('userID');
+  let userID = getCookie('userID2');
   if (!userID) {
     userID = 'user_' + Date.now(); // Simple unique ID using timestamp
-    setCookie('userID', userID, 1); // Cookie expires in 1 day
+    setCookie('userID2', userID, 1); // Cookie expires in 1 day
   }
 
   // Function to create the Chat UI
   function createChatUI() {
-    const chatPlaceholder = document.getElementById('chat-placeholder');
+    const chatPlaceholder = document.getElementById('chat-placeholder-2');
     if (!chatPlaceholder) {
       console.log('Chat placeholder not found.');
       return;
@@ -53,7 +53,7 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
 
     // Create chat header, chat box, input area, and buttons
     chatContainer.innerHTML = `
-      <div id="chat-header">✨Learn more with our AI Assistant✨</div>
+      <div id="chat-header">✨Consulta el estado de la entrega en vivo✨</div>
       <div id="chat-box"></div>
       <div id="chat-buttons">
         <button class="preset-button" data-message="get in touch">Get in touch</button>
@@ -235,7 +235,7 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
 
     // Send initial request to the backend on page load
     window.addEventListener('load', () => {
-      fetch('ADD YOUR DEPLOYED OR LOCAL URL WITH THIS=>/api/chat', {
+      fetch('https://5000-dylankane-emergencylogi-emlpoc5742k.ws-eu116.gitpod.io/api/chatbot2', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -304,7 +304,7 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
     chatBox.scrollTop = chatBox.scrollHeight;
 
     // Send user message to backend
-    fetch('ADD YOUR DEPLOYED OR LOCAL URL WITH THIS=>/api/chat', {
+    fetch('https://5000-dylankane-emergencylogi-emlpoc5742k.ws-eu116.gitpod.io/api/chatbot2', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
