@@ -12,7 +12,7 @@ app.use(cors());
 
 // Add headers to handle CORS issues
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'ADD YOUR WEBSITE URL WHERE THE BOT WILL BE EMBEDDED HERE');
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
@@ -22,7 +22,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 // Endpoint to handle chat messages
-app.post('/api/chat', async (req, res) => {
+app.post('/api/chatbot2', async (req, res) => {
   const { message, url, metadata } = req.body;
   const userID = req.body.userID; // Using a static userID for testing
 
