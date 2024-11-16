@@ -1,13 +1,5 @@
-To be added to the footer of the website where you want to embed. With a placeholder div where ever you want to display the chat bot
-
-<div id="chat-placeholder-2"></div>
-
-In this script you can edit the front end appearance too. 
-There is two placeholders that have to be set to you backend url either local or deployed it will look like this with the /api/chat added to the end:
-https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
-
 <script>
-(function() {
+(function () {
   // Collect metadata (collecting URL and language)
   const metadata = {
     type: 'pageLoad',
@@ -33,10 +25,10 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
   }
 
   // Generate or retrieve User ID
-  let userID = getCookie('userID2');
+  let userID = getCookie('userID');
   if (!userID) {
     userID = 'user_' + Date.now(); // Simple unique ID using timestamp
-    setCookie('userID2', userID, 1); // Cookie expires in 1 day
+    setCookie('userID', userID, 1); // Cookie expires in 1 day
   }
 
   // Function to create the Chat UI
@@ -56,13 +48,15 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
       <div id="chat-header">✨Consulta el estado de la entrega en vivo✨</div>
       <div id="chat-box"></div>
       <div id="chat-buttons">
-        <button class="preset-button" data-message="get in touch">Get in touch</button>
-        <button class="preset-button" data-message="what we do">What we do</button>
-        <button class="preset-button" data-message="ai ideas">AI Ideas</button>
+        <button class="preset-button preset-style" data-message="search delivery details">Entregas</button>
+        <button class="preset-button preset-style" data-message="Information on order items">Artículos de entrega</button>
+        <button class="preset-button preset-style" data-message="personnel data">Personal</button>
       </div>
       <div id="chat-input">
+        <button id="toggleButton" class="preset-button" data-message="mute"><i class="fas fa-volume-up"></i></button>
         <input type="text" id="message-input" placeholder="Type your message here...">
         <button id="send-button">➤</button>
+        <button id="mic-button" title="Click to speak"><i class="fa fa-microphone"></i></button>
       </div>
     `;
     chatPlaceholder.appendChild(chatContainer);
@@ -102,8 +96,8 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
       /* Message styling */
       .message {
         margin: 8px 0;
-        padding: 10px;
-        border-radius: 20px;
+        padding: 5px 10px;
+        border-radius: 25px;
         display: block;
         width: fit-content;
         max-width: 80%;
@@ -115,7 +109,7 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
         color: #54595F;
         align-self: flex-end;
         text-align: right;
-        margin-left: auto;
+        margin-left: auto; 
       }
       /* Bot message styling */
       .bot-message {
@@ -141,8 +135,8 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
         outline: none;
         height: 40px;
       }
-      /* Send button styling */
-      #send-button {
+      /* Button styling */
+      #send-button, #mic-button, #toggleButton {
         background-color: #D1C026;
         color: #ffffff;
         border: none;
@@ -151,10 +145,16 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
         border-radius: 50px;
         cursor: pointer;
       }
-      #send-button:hover {
+      #send-button:hover, #mic-button:hover, toggleButton:hover {
         background-color: #ffffff;
         color: #D1C026;
         border: 1px solid #54595F;
+      }
+      #mic-button {
+        font-size: 1.2em;
+      }
+      #toggleButton {
+        margin-right: 10px;
       }
       /* Preset buttons styling */
       #chat-buttons {
@@ -162,7 +162,7 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
         justify-content: space-around;
         padding: 10px;
       }
-      .preset-button {
+      .preset-style {
         background-color: #ffffff;
         color: #54595F;
         border: 1px solid #54595F;
@@ -171,7 +171,7 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
         cursor: pointer;
         font-size: 0.8em;
       }
-      .preset-button:hover {
+      .preset-style:hover {
         background-color: #d1c026;
         color: #ffffff;
         border: 1px solid #54595F;
@@ -212,29 +212,85 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
     const chatBox = document.getElementById('chat-box');
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
+    const micButton = document.getElementById('mic-button');
+    const toggleButton = document.getElementById('toggleButton');
     const presetButtons = document.querySelectorAll('.preset-button');
+
+    // Add initial loading animation before bot response
+    const initialLoadingDiv = document.createElement('div');
+    initialLoadingDiv.classList.add('message', 'bot-message', 'loading');
+    initialLoadingDiv.innerHTML = `
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+    `;
+    chatBox.appendChild(initialLoadingDiv);
 
     // Handle sending user messages
     sendButton.addEventListener('click', () => {
-      sendMessage();
+      sendMessage(messageInput, sendButton, micButton, presetButtons);
     });
 
     messageInput.addEventListener('keypress', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        sendMessage();
+        sendMessage(messageInput, sendButton, micButton, presetButtons);
       }
     });
 
     presetButtons.forEach(button => {
       button.addEventListener('click', () => {
         const message = button.getAttribute('data-message');
-        sendMessage(message);
+        sendMessage(messageInput, sendButton, micButton, presetButtons, message);
       });
+    });
+
+    // Handle microphone button for speech-to-text
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-US'; // Default to English; change dynamically if needed
+      recognition.interimResults = false;
+
+      micButton.addEventListener('click', () => {
+        recognition.start();
+      });
+
+     recognition.addEventListener('result', (event) => {
+  		const transcript = event.results[0][0].transcript;
+  		messageInput.value = transcript; // Populate input field with transcription
+  		// Add a delay before sending the message to ensure full transcription is visible
+ 		 setTimeout(() => {
+  	  	sendMessage(messageInput, sendButton, micButton, presetButtons);
+  		}, 500); // 1000ms delay for better user experience
+	});
+
+
+      recognition.addEventListener('error', (event) => {
+        console.error('Speech recognition error:', event.error);
+      });
+    } else {
+      console.warn('Speech Recognition not supported in this browser.');
+      micButton.style.display = 'none'; // Hide microphone button if unsupported
+    }
+
+    // Toggle button functionality for volume icon
+    toggleButton.addEventListener('click', () => {
+      const icon = toggleButton.querySelector('i');
+      if (icon.classList.contains('fa-volume-up')) {
+        icon.classList.remove('fa-volume-up');
+        icon.classList.add('fa-volume-mute');
+      } else {
+        icon.classList.remove('fa-volume-mute');
+        icon.classList.add('fa-volume-up');
+      }
     });
 
     // Send initial request to the backend on page load
     window.addEventListener('load', () => {
+      // Disable inputs while waiting for bot response
+      disableInputs(messageInput, sendButton, micButton, presetButtons);
+
       fetch('https://5000-dylankane-emergencylogi-emlpoc5742k.ws-eu116.gitpod.io/api/chatbot2', {
         method: 'POST',
         headers: {
@@ -246,29 +302,37 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
           metadata,
         }),
       })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Voiceflow Response:', data); // Log response for debugging
-        if (data && Array.isArray(data)) {
-          data.forEach(item => {
-            if (item.payload && item.payload.message) {
-              const botMessage = item.payload.message;
-              appendMessage(botMessage, 'bot');
-            }
-          });
-        }
-      })
-      .catch(error => {
-        console.error('Error sending initial message to backend:', error);
-      });
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Voiceflow Response:', data); // Log response for debugging
+          // Remove initial loading animation
+          chatBox.removeChild(initialLoadingDiv);
+          enableInputs(messageInput, sendButton, micButton, presetButtons); // Re-enable inputs after bot response
+
+          if (data && Array.isArray(data)) {
+            data.forEach(item => {
+              if (item.payload && item.payload.message) {
+                const botMessage = item.payload.message;
+                appendMessage(botMessage, 'bot');
+              }
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error sending initial message to backend:', error);
+          // Remove initial loading animation on error
+          chatBox.removeChild(initialLoadingDiv);
+          enableInputs(messageInput, sendButton, micButton, presetButtons); // Re-enable inputs on error
+          // Append error message to chat UI
+          appendMessage('Lo sentimos, no se pudo conectar con el servidor. Por favor, inténtelo de nuevo más tarde.', 'bot');
+        });
     });
   }
-
   createChatUI();
 
   // Append message to chat UI
@@ -278,22 +342,30 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
 
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
-    messageDiv.textContent = message;
+
+    if (message.includes('<audio')) {
+      messageDiv.innerHTML = message; // Insert as HTML
+    } else {
+      messageDiv.textContent = message;
+    }
+
     chatBox.appendChild(messageDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
-  function sendMessage(message) {
-    const messageInput = document.getElementById('message-input');
+  function sendMessage(messageInput, sendButton, micButton, presetButtons, message) {
     const userMessage = message || messageInput.value.trim();
     if (userMessage === '') return;
 
     appendMessage(userMessage, 'user');
     messageInput.value = '';
 
+    // Disable inputs while waiting for bot response
+    disableInputs(messageInput, sendButton, micButton, presetButtons);
+
     // Add loading animation
     const loadingDiv = document.createElement('div');
-	const chatBox = document.getElementById('chat-box');
+    const chatBox = document.getElementById('chat-box');
     loadingDiv.classList.add('message', 'bot-message', 'loading');
     loadingDiv.innerHTML = `
       <div class="loading-dot"></div>
@@ -315,30 +387,54 @@ https://embedded-assistant-d67a1ffd976e.herokuapp.com/api/chat
         metadata,
       }),
     })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Voiceflow Response:', data); // Log response for debugging
-      // Remove loading animation
-      chatBox.removeChild(loadingDiv);
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Voiceflow Response:', data); // Log response for debugging
+        // Remove loading animation
+        chatBox.removeChild(loadingDiv);
+        enableInputs(messageInput, sendButton, micButton, presetButtons); // Re-enable inputs after bot response
 
-      if (data && Array.isArray(data)) {
-        data.forEach(item => {
-          if (item.payload && item.payload.message) {
-            const botMessage = item.payload.message;
-            appendMessage(botMessage, 'bot');
-          }
-        });
-      }
-    })
-    .catch(error => {
-      console.error('Error sending user message to backend:', error);
-      // Remove loading animation on error
-      chatBox.removeChild(loadingDiv);
+        if (data && Array.isArray(data)) {
+          data.forEach(item => {
+            if (item.payload && item.payload.message) {
+              const botMessage = item.payload.message;
+              appendMessage(botMessage, 'bot');
+            }
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error sending user message to backend:', error);
+        // Remove loading animation on error
+        chatBox.removeChild(loadingDiv);
+        enableInputs(messageInput, sendButton, micButton, presetButtons); // Re-enable inputs on error
+        // Append error message to chat UI
+        appendMessage('Lo sentimos, no se pudo conectar con el servidor. Por favor, inténtelo de nuevo más tarde.', 'bot');
+      });
+  }
+
+  // Function to disable user inputs and buttons
+  function disableInputs(messageInput, sendButton, micButton, presetButtons) {
+    messageInput.disabled = true;
+    sendButton.disabled = true;
+    micButton.disabled = true;
+    presetButtons.forEach(button => {
+      button.disabled = true;
+    });
+  }
+
+  // Function to enable user inputs and buttons
+  function enableInputs(messageInput, sendButton, micButton, presetButtons) {
+    messageInput.disabled = false;
+    sendButton.disabled = false;
+    micButton.disabled = false;
+    presetButtons.forEach(button => {
+      button.disabled = false;
     });
   }
 })();
