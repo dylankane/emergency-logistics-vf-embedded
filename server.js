@@ -21,6 +21,9 @@ app.use((req, res, next) => {
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+// Serve static files from the "static" directory
+app.use(express.static('static'));
+
 // Endpoint to handle chat messages
 app.post('/api/chatbot2', async (req, res) => {
   const { message, url, metadata } = req.body;
