@@ -49,7 +49,7 @@
       <div id="chat-box"></div>
       <div id="chat-buttons">
         <button class="preset-button preset-style" data-message="search delivery details">Entregas</button>
-        <button class="preset-button preset-style" data-message="Information on order items">Artículos de entrega</button>
+        <button class="preset-button preset-style" data-message="order items query">Artículos de entrega</button>
         <button class="preset-button preset-style" data-message="personnel data">Personal</button>
       </div>
       <div id="chat-input">
@@ -58,6 +58,7 @@
         <button id="send-button">➤</button>
         <button id="mic-button" title="Click to speak"><i class="fa fa-microphone"></i></button>
       </div>
+      <div id="special-message-box"></div>
     `;
     chatPlaceholder.appendChild(chatContainer);
 
@@ -67,7 +68,7 @@
       /* Chat container styling */
       #chat-container {
         width: 85%;
-        max-height: 500px;
+        max-height: 800px;
         background-color: #ffffff;
         border: none;
         border-radius: 10px;
@@ -92,6 +93,15 @@
         padding: 10px;
         overflow-y: auto;
         background-color: #ffffff;
+      }
+      /* special-message-box styling */
+      #special-message-box {
+        flex: 1;
+        max-height: 300px
+        padding: 10px;
+        overflow-y: auto;
+        background-color: #ffffff;
+		margin-top: 20px;
       }
       /* Message styling */
       .message {
@@ -232,18 +242,21 @@
     });
 
     messageInput.addEventListener('keypress', (event) => {
-      if (event.key === 'Enter') {
+      const loadingDivExists = document.querySelector('.loading');
+      if (event.key === 'Enter' && !loadingDivExists) {
         event.preventDefault();
         sendMessage(messageInput, sendButton, micButton, presetButtons);
       }
     });
 
     presetButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const message = button.getAttribute('data-message');
-        sendMessage(messageInput, sendButton, micButton, presetButtons, message);
-      });
-    });
+  		button.addEventListener('click', () => {
+    		const message = button.getAttribute('data-message');
+    	// Set hideMessage to true so the message is not appended to the chat box
+    	sendMessage(messageInput, sendButton, micButton, presetButtons, message, true);
+  		});
+	});
+
 
     // Handle microphone button for speech-to-text
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -256,15 +269,14 @@
         recognition.start();
       });
 
-     recognition.addEventListener('result', (event) => {
-  		const transcript = event.results[0][0].transcript;
-  		messageInput.value = transcript; // Populate input field with transcription
-  		// Add a delay before sending the message to ensure full transcription is visible
- 		 setTimeout(() => {
-  	  	sendMessage(messageInput, sendButton, micButton, presetButtons);
-  		}, 500); // 1000ms delay for better user experience
-	});
-
+      recognition.addEventListener('result', (event) => {
+        const transcript = event.results[0][0].transcript;
+        messageInput.value = transcript; // Populate input field with transcription
+        // Add a delay before sending the message to ensure full transcription is visible
+        setTimeout(() => {
+          sendMessage(messageInput, sendButton, micButton, presetButtons);
+        }, 700); // 500ms delay for better user experience
+      });
 
       recognition.addEventListener('error', (event) => {
         console.error('Speech recognition error:', event.error);
@@ -318,7 +330,7 @@
             data.forEach(item => {
               if (item.payload && item.payload.message) {
                 const botMessage = item.payload.message;
-                appendMessage(botMessage, 'bot');
+                processBotMessage(botMessage); // Process the bot message
               }
             });
           }
@@ -335,6 +347,19 @@
   }
   createChatUI();
 
+  function appendSpecialMessage(message) {
+    const specialMessageBox = document.getElementById('special-message-box');
+    if (!specialMessageBox) {
+      console.error('Special message box not found.');
+      return;
+    }
+    console.log('Appending to special-message-box:', message); // Debug log
+  
+    // Clear existing content and add the new message
+    specialMessageBox.innerHTML = message; // Directly replace the content of the special message box
+  }
+  
+
   // Append message to chat UI
   function appendMessage(message, sender) {
     const chatBox = document.getElementById('chat-box');
@@ -343,8 +368,8 @@
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
 
-    if (message.includes('<audio')) {
-      messageDiv.innerHTML = message; // Insert as HTML
+    if (message.includes('<audio') || message.includes('<table')) {
+      messageDiv.innerHTML = message; // Insert as HTML to allow tables and audio
     } else {
       messageDiv.textContent = message;
     }
@@ -353,74 +378,83 @@
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
-  function sendMessage(messageInput, sendButton, micButton, presetButtons, message) {
-    const userMessage = message || messageInput.value.trim();
-    if (userMessage === '') return;
+function sendMessage(messageInput, sendButton, micButton, presetButtons, message, hideMessage = false) {
+  const userMessage = message || messageInput.value.trim();
+  if (userMessage === '') return;
 
+  // Append the message to the chat only if `hideMessage` is false
+  if (!hideMessage) {
     appendMessage(userMessage, 'user');
-    messageInput.value = '';
-
-    // Disable inputs while waiting for bot response
-    disableInputs(messageInput, sendButton, micButton, presetButtons);
-
-    // Add loading animation
-    const loadingDiv = document.createElement('div');
-    const chatBox = document.getElementById('chat-box');
-    loadingDiv.classList.add('message', 'bot-message', 'loading');
-    loadingDiv.innerHTML = `
-      <div class="loading-dot"></div>
-      <div class="loading-dot"></div>
-      <div class="loading-dot"></div>
-    `;
-    chatBox.appendChild(loadingDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    // Send user message to backend
-    fetch('https://5000-dylankane-emergencylogi-emlpoc5742k.ws-eu116.gitpod.io/api/chatbot2', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: userMessage,
-        userID: userID,
-        metadata,
-      }),
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Voiceflow Response:', data); // Log response for debugging
-        // Remove loading animation
-        chatBox.removeChild(loadingDiv);
-        enableInputs(messageInput, sendButton, micButton, presetButtons); // Re-enable inputs after bot response
-
-        if (data && Array.isArray(data)) {
-          data.forEach(item => {
-            if (item.payload && item.payload.message) {
-              const botMessage = item.payload.message;
-              appendMessage(botMessage, 'bot');
-            }
-          });
-        }
-      })
-      .catch(error => {
-        console.error('Error sending user message to backend:', error);
-        // Remove loading animation on error
-        chatBox.removeChild(loadingDiv);
-        enableInputs(messageInput, sendButton, micButton, presetButtons); // Re-enable inputs on error
-        // Append error message to chat UI
-        appendMessage('Lo sentimos, no se pudo conectar con el servidor. Por favor, inténtelo de nuevo más tarde.', 'bot');
-      });
   }
+
+  messageInput.value = '';
+
+  // Disable inputs while waiting for bot response
+  disableInputs(messageInput, sendButton, micButton, presetButtons);
+
+  // Add loading animation
+  const loadingDiv = document.createElement('div');
+  const chatBox = document.getElementById('chat-box');
+  loadingDiv.classList.add('message', 'bot-message', 'loading');
+  loadingDiv.innerHTML = `
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  `;
+  chatBox.appendChild(loadingDiv);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  // Send user message to backend
+  fetch('https://5000-dylankane-emergencylogi-emlpoc5742k.ws-eu116.gitpod.io/api/chatbot2', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message: userMessage,
+      userID: userID,
+      metadata,
+    }),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Voiceflow Response:', data); // Log response for debugging
+      // Remove loading animation
+      if (chatBox.contains(loadingDiv)) {
+        chatBox.removeChild(loadingDiv);
+      }
+      enableInputs(messageInput, sendButton, micButton, presetButtons); // Re-enable inputs after bot response
+
+      if (data && Array.isArray(data)) {
+        data.forEach(item => {
+          if (item.payload && item.payload.message) {
+            const botMessage = item.payload.message;
+            processBotMessage(botMessage); // Process the bot message
+          }
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error sending user message to backend:', error);
+      // Remove loading animation on error
+      if (chatBox.contains(loadingDiv)) {
+        chatBox.removeChild(loadingDiv);
+      }
+      enableInputs(messageInput, sendButton, micButton, presetButtons); // Re-enable inputs on error
+      // Append error message to chat UI
+      appendMessage('Lo sentimos, no se pudo conectar con el servidor. Por favor, inténtelo de nuevo más tarde.', 'bot');
+    });
+}
+
 
   // Function to disable user inputs and buttons
   function disableInputs(messageInput, sendButton, micButton, presetButtons) {
-    messageInput.disabled = true;
+    messageInput.disabled = false;
     sendButton.disabled = true;
     micButton.disabled = true;
     presetButtons.forEach(button => {
@@ -437,5 +471,44 @@
       button.disabled = false;
     });
   }
+
+  // Function to process bot messages
+  function processBotMessage(botMessage) {
+    if (botMessage.startsWith('Type: order_items')) {
+      // Remove "Type: order_items, " from the beginning
+      const content = botMessage.replace(/^Type:\s*order_items,\s*/, '');
+      // Split content into individual item key-value pairs
+      const keyValuePairs = content.split(',');
+
+      // Convert key-value pairs into an array of objects
+      const items = [];
+      let currentItem = {};
+      keyValuePairs.forEach(pair => {
+        const [key, value] = pair.split(':').map(item => item.trim());
+        if (key === 'order_no' && Object.keys(currentItem).length > 0) {
+          items.push(currentItem);
+          currentItem = {};
+        }
+        currentItem[key] = value;
+      });
+      // Push the last item
+      if (Object.keys(currentItem).length > 0) {
+        items.push(currentItem);
+      }
+
+      // Generate HTML table from items
+      let tableHTML = '<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Order No</th><th>Item Name</th><th>Quantity</th><th>Description</th></tr></thead><tbody>';
+      items.forEach(item => {
+        tableHTML += `<tr><td>${item.order_no || ''}</td><td>${item.item_name || ''}</td><td>${item.quantity || ''}</td><td>${item.item_description || ''}</td></tr>`;
+      });
+      tableHTML += '</tbody></table>';
+
+      // Append table to chat UI
+      appendSpecialMessage(tableHTML);
+    } else {
+      appendMessage(botMessage, 'bot');
+    }
+  }
 })();
+
 </script>
