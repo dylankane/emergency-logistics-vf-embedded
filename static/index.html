@@ -8,9 +8,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="/style.css">
@@ -20,20 +18,23 @@
 
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg text-white bg-black">
-        <div class="container-fluid">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid ms-auto">
+            <div class="logo-title">
+                <h5>EMERGENCY <br> LOGISTICS</h5>
+            </div>
             <ul class="navbar-nav d-flex flex-row ms-auto">
                 <li class="nav-item px-2">
-                    <a class="nav-link text-white" href="#">Home</a>
+                    <a class="nav-link text-white" href="index.html">Home</a>
                 </li>
                 <li class="nav-item px-2">
-                    <a class="nav-link text-white" href="#">AI Labs</a>
+                    <a class="nav-link text-white" href="database.html">DataBase</a>
                 </li>
                 <li class="nav-item px-2">
-                    <a class="nav-link text-white" href="#">Contact Us</a>
+                    <a class="nav-link text-white" href="https://www.mkgdigital.es/ailab/" target="_blank">AI Labs</a>
                 </li>
                 <li class="nav-item px-2">
-                    <a class="nav-link text-white" href="#">Policies</a>
+                    <a class="nav-link text-white" href="policies.html">Policies</a>
                 </li>
             </ul>
         </div>
@@ -41,25 +42,26 @@
 
     <!-- Header Section -->
     <header>
-        <div class="container-fluid mt-5 px-0">
+        <div class="container-fluid mt-3 px-0">
             <!-- Main Title -->
-            <div class="main-title text-start ms-5 text-white p-6">
+            <!--<div class="main-title text-start ms-5 text-white p-5">
                 EMERGENCY <br> LOGISTICS
+            </div>-->
+            <!-- Centered Logo -->
+            <div class="text-center mt-4">
+                <img src="./images/Logística de.png" alt="Logo" class="logo img-fluid">
             </div>
-    
             <!-- Sub Title -->
-            <div class="sub-title mt-5 mx-auto text-white p-5">
-                Information Center
+            <div class="sub-title mt-2 p-2 mx-auto">
+                <h1>Hub De IA</h1>
+                <p class="sub-text">Deja que la IA<br>te ayude a ayudar a otros</p>
             </div>
         </div>
     </header>
 
     <!-- Main Section -->
     <main class="container">
-        <!-- Centered Logo -->
-        <div class="text-center mt-4">
-            <img src="./images/Logística de.png" alt="Logo" class="logo img-fluid">
-        </div>
+        
 
         <!-- Chatbot Div -->
         <div class="container-chat-ui mt-4 text-center">
@@ -75,19 +77,25 @@
                 <img src="./images/Untitled design (6).png" alt="Helping Hands" class="img-fluid" style="max-width: 100px;">
             </div>
             <!-- Black Banner with Text -->
-            <div class="sub-title text-white text-center p-4">
+            <div class="banner text-center p-4">
                 Ayuda Cuando Más Se Necesita
             </div>
         </div>
 
         <!-- Maps Placeholder -->
         <div class="maps-container mt-5">
-            <div id="maps"></div>
-        </div>
+            <div id="map-container">
+                <iframe
+                    width="100%"
+                    height="100%"
+                    style="border:0"
+                    loading="lazy"
+                    allowfullscreen
+                    referrerpolicy="no-referrer-when-downgrade"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d317715.4119070798!2d-3.8196206964360347!3d40.43813107755496!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd4229970407b3b1%3A0x17f9d36f2a30f411!2sMadrid%2C%20Spain!5e0!3m2!1sen!2ses!4v1600000000000!5m2!1sen!2ses">
+                </iframe>
 
-        <!-- Sheets Placeholder -->
-        <div class="sheets-container mt-4">
-            <div id="sheets"></div>
+            </div>
         </div>
     </main>
 
