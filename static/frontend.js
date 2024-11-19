@@ -67,9 +67,9 @@
     style.innerHTML = `
       /* Chat container styling */
       #chat-container {
-        width: 85%;
+        width: 90%;
         max-height: 800px;
-        background-color: #ffffff;
+        background-color: #f5f5f5;
         border: none;
         border-radius: 10px;
         display: flex;
@@ -80,7 +80,7 @@
       }
       /* Chat header styling */
       #chat-header {
-        background-color: #ffffff;
+        background-color: #f5f5f5;
         color: #54595F;
         padding: 10px;
         text-align: left;
@@ -90,7 +90,7 @@
         flex: 1;
         padding: 10px;
         overflow-y: auto;
-        background-color: #ffffff;
+        background-color: #f5f5f5;
       }
       /* special-message-box styling */
       #special-message-box {
@@ -98,7 +98,7 @@
         max-height: 300px
         padding: 10px;
         overflow-y: auto;
-        background-color: #ffffff;
+        background-color: #f5f5f5;
 		margin-top: 20px;
       }
       /* Message styling */
@@ -138,28 +138,28 @@
       #message-input {
         flex: 1;
         padding: 10px;
-        border: 1px solid #54595F;
-        border-radius: 25px;
+        border: 1px solid #000000;
+        border-radius: 10px;
         outline: none;
         height: 40px;
       }
       /* Button styling */
       #send-button, #mic-button, #toggleButton {
         background-color: #ff5757;
-        color: #ffffff;
+        color: #f5f5f5;
         border: none;
         padding: 10px 25px;
         margin-left: 10px;
-        border-radius: 50px;
+        border-radius: 15px;
         cursor: pointer;
       }
       #send-button:hover, #mic-button:hover, toggleButton:hover {
-        background-color: #ffffff;
+        background-color: #f5f5f5;
         color: #ff5757;
-        border: 1px solid #54595F;
+        border: 1px solid #000000;
       }
       #mic-button {
-        font-size: 1.2em;
+        /*font-size: 1.2em;*/
       }
       #toggleButton {
         margin-right: 10px;
@@ -171,18 +171,18 @@
         padding: 10px;
       }
       .preset-style {
-        background-color: #ffffff;
-        color: #54595F;
-        border: 1px solid #54595F;
+        background-color: #0c1238;
+        color: #f5f5f5;
+        border: 1px solid #000000;
         padding: 5px 10px;
         border-radius: 25px;
         cursor: pointer;
         font-size: 0.8em;
       }
       .preset-style:hover {
-        background-color: #ff5757;
-        color: #ffffff;
-        border: 1px solid #54595F;
+        background-color: #f5f5f5;
+        color: #000000;
+        border: 1px solid #000000;
       }
       /* Loading dots animation */
       .loading {
