@@ -1,0 +1,45 @@
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Roboto Mono", monospace;
+    font-weight: 400;
+    background-color: #ffffff;
+    color: rgb(55, 55, 55);
+    letter-spacing: 1px;
+    line-height: 1em;
+    margin: 0;
+    padding: 0;
+}
+
+.main-title {
+    background-color: black;
+    color: white;
+    font-size: 2rem;
+    padding: 20px;
+    width: fit-content;
+    margin: 0 auto;
+    line-height: 1.2em;
+}
+
+.sub-title {
+    background-color: black;
+    font-size: 1.5rem;
+    width: 50%;
+    
+}
+
+.logo {
+    max-width: 150px; /* Restrict the size of the logo */
+    height: auto; /* Maintain aspect ratio */
+}
+
+.container-chat-ui {
+    text-align: center;
+    font-family: "Space Mono";
+}
+
+footer {
+    margin-top: 40px;
+}
